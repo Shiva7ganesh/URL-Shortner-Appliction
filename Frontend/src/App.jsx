@@ -4,6 +4,7 @@ import Home from "./pages/home/home";
 import Dashboard from "./pages/dashboard/dashboard";
 import { ToastContainer } from "react-toastify";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Redirect from "./components/Redirect";
 function App() {
   return (
     <div className="App">
@@ -12,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/r/:code" element={<Redirect />} />
         </Routes>
       </BrowserRouter>
       <Footer />
