@@ -12,11 +12,9 @@ import com.shivaganesh.Url_shortner_Application.exception.ResourceNotFoundExcept
 import com.shivaganesh.Url_shortner_Application.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,12 +23,11 @@ public class urlServiceImpl implements urlService{
 
     final UrlRepository urlRepository;
     final UserRepository userRepository;
-    private final AbstractHandlerMethodAdapter abstractHandlerMethodAdapter;
 
     @Override
     public Url createShortUrl(CreateUrlRequest request) {
         if(urlRepository.existsByShortUrl(request.getShortUrl())){
-            throw new DuplicateShortUrlException("Url Already Exists");
+            throw new DuplicateShortUrlException("Short Url Already Exists");
         }
 
         Url url = Url.builder().shortUrl(request.getShortUrl())
@@ -40,8 +37,8 @@ public class urlServiceImpl implements urlService{
     }
 
     @Override
-    public Url editShortUrl(CreateUrlRequest request) {
-        String uid= JwtUtil.extractUid(request.getToken());
+    public void editShortUrl(CreateUrlRequest request,String token) {
+        String uid= JwtUtil.extractUid(token);
         if(!checkUser(uid,request.getShortUrl())){
             throw  new RuntimeException("Url Doesn't Belong to user");
         }
@@ -49,34 +46,27 @@ public class urlServiceImpl implements urlService{
         url.setOrgUrl(request.getOrgUrl());
 
         urlRepository.save(url);
-        return url;
     }
 
     @Override
-    public void deleteShortUrl(Map<String, String> request) {
+    public void deleteShortUrl(Map<String, String> request,String token) {
 
-        // 1️⃣ Extract UID from token
-        String uid = JwtUtil.extractUid(request.get("token"));
+        String uid = JwtUtil.extractUid(token);
 
-        // 2️⃣ Fetch user ONCE
         User user = userRepository.findByUid(uid)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // 3️⃣ Ownership check (authorization, not existence)
         if (user.getShortUrls() == null ||
                 !user.getShortUrls().contains(request.get("shortUrl"))) {
             throw new UnauthorizedException("Url doesn't belong to user");
         }
 
-        // 4️⃣ Ensure URL exists
         Url url = urlRepository.findByShortUrl(request.get("shortUrl"))
                 .orElseThrow(() -> new ResourceNotFoundException("Url not found"));
 
-        // 5️⃣ Remove reference FIRST
         user.getShortUrls().remove(request.get("shortUrl"));
         userRepository.save(user);
 
-        // 6️⃣ Delete URL record
         urlRepository.delete(url);
     }
 
@@ -134,5 +124,10 @@ public class urlServiceImpl implements urlService{
         user.getShortUrls().add(shorturl);
         userRepository.save(user);
         return JwtUtil.generateToken(uid);
+    }
+
+    @Override
+    public String parseToken(String header) {
+        return header.replace("Bearer ","");
     }
 }

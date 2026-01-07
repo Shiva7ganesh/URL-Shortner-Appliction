@@ -18,5 +18,5 @@ public class CreateUrlRequest {
     @NotBlank(message = "Original URL cannot be empty")
     @URL(message ="Not a Valid URL")
     private String orgUrl;
-    private String token;
+//    private String token;
 }

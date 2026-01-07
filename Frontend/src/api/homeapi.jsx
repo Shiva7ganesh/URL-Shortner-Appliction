@@ -39,31 +39,41 @@ const submit = (longRef, codeRef, btn, setOutput) => {
     fetch("/api/url/add", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token ? token : ""
         },
         body: JSON.stringify({
             orgUrl: long,
             shortUrl: code,
-            token: token ? token : ""
+            // token: token ? token : ""
         })
-    }).then(res => res.json()).then((data) => {
-        if (data.error) {
-            toast.error(data.message);
-            if (data.message === "Code Already Exists") {
-                codeRef.current.focus()
+    }).then(res => {
+        if (token == null) {
+            let tk = res.headers.get("Authorization");
+            tk = tk.replace("Bearer ", "")
+            if (tk) {
+                localStorage.setItem("urltoken", tk);
             }
-        } else {
-            toast.success(data.message);
-            longRef.current.value = "";
-            codeRef.current.value = "";
-            setOutput(data.url);
-            localStorage.setItem("urltoken", data.token);
         }
-        btn.disabled = false;
-        btn.innerText = "Create";
-        btn.classList.remove("fetching");
-        return;
+        return res.json();
     })
+        .then((data) => {
+            if (data.error) {
+                toast.error(data.message);
+                if (data.message === "Short Url Already Exists") {
+                    codeRef.current.focus()
+                }
+            } else {
+                toast.success(data.message);
+                longRef.current.value = "";
+                codeRef.current.value = "";
+                setOutput(data.url);
+            }
+            btn.disabled = false;
+            btn.innerText = "Create";
+            btn.classList.remove("fetching");
+            return;
+        })
 }
 
 export default submit

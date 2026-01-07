@@ -5,9 +5,10 @@ function delurl(short, setLoading, setData) {
     fetch("/api/url/delete", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token ? token : ""
         },
-        body: JSON.stringify({ token: token, shortUrl: short })
+        body: JSON.stringify({ shortUrl: short })
     }).then(res => res.json()).then(data => {
         if (data.error) {
             toast.error(data.message)

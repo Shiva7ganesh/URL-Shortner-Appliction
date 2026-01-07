@@ -11,9 +11,9 @@ public interface urlService {
 
     Url createShortUrl(CreateUrlRequest request);
 
-    Url editShortUrl(CreateUrlRequest request);
+    void editShortUrl(CreateUrlRequest request,String token);
 
-    void deleteShortUrl(Map<String, String> request);
+    void deleteShortUrl(Map<String, String> request,String token);
 
     boolean checkUser(String uid,String shortUrl);
 
@@ -24,4 +24,6 @@ public interface urlService {
     void incrementCount(Url url);
 
     String handleToken(String token,String shorturl);
+
+    String parseToken(String header);
 }

@@ -4,18 +4,14 @@ import com.shivaganesh.Url_shortner_Application.DTO.*;
 import com.shivaganesh.Url_shortner_Application.Model.Url;
 import com.shivaganesh.Url_shortner_Application.Security.JwtUtil;
 import com.shivaganesh.Url_shortner_Application.Service.urlService;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,11 +26,11 @@ public class urlController {
 
     @PostMapping("/add")
     public ResponseEntity<?> createUrl(
-            @Valid @RequestBody CreateUrlRequest request
+            @Valid @RequestBody CreateUrlRequest request,
+            @RequestHeader(value = "Authorization", required = false) String header
             ){
 
-        String token = request.getToken();
-
+        String token = urlservice.parseToken(header);
         Url url = urlservice.createShortUrl(request);
 
         String jwt = urlservice.handleToken(token,request.getShortUrl());
@@ -43,18 +39,21 @@ public class urlController {
 
         String shortUrl = domain + url.getShortUrl();
 
-        return ResponseEntity.ok(
-                new urlCreateResponse(
+        return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + jwt)
+                .body(new urlCreateResponse(
                         false,
                         "URL Generated Successfully",
-                        shortUrl,
-                        jwt
+                        shortUrl
                 ));
     }
 
     @PostMapping("/edit")
-    public ResponseEntity<responseMessage> editUrl(@Valid @RequestBody CreateUrlRequest request){
-        urlservice.editShortUrl(request);
+    public ResponseEntity<responseMessage> editUrl(@Valid @RequestBody CreateUrlRequest request,
+                                                   @RequestHeader("Authorization") String header
+    ){
+        String token = urlservice.parseToken(header);
+        urlservice.editShortUrl(request,token);
         return ResponseEntity.ok(
                 new responseMessage(
                         false,
@@ -63,8 +62,11 @@ public class urlController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<responseMessage> deleteUrl(@RequestBody Map<String, String> body){
-        urlservice.deleteShortUrl(body);
+    public ResponseEntity<responseMessage> deleteUrl(@RequestBody Map<String, String> body,
+                                                     @RequestHeader("Authorization") String header
+    ){
+        String token = urlservice.parseToken(header);
+        urlservice.deleteShortUrl(body,token);
         return ResponseEntity.ok(
                 new responseMessage(
                         false,
@@ -76,7 +78,7 @@ public class urlController {
     public ResponseEntity<dashResponse> getDashBoard(
             @RequestHeader("Authorization") String authHeader){
 
-        String token = authHeader.replace("Bearer ","");
+        String token = urlservice.parseToken(authHeader);
         String uid = JwtUtil.extractUid(token);
         return ResponseEntity.ok(
                 new dashResponse(

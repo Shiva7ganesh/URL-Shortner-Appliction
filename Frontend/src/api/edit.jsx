@@ -17,9 +17,10 @@ function EditAPI(lRef, code, setEdit, setLoading, setData) {
     fetch("/api/url/edit", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token ? token : ""
         },
-        body: JSON.stringify({ token: token, orgUrl: long, shortUrl: code })
+        body: JSON.stringify({ orgUrl: long, shortUrl: code })
     }).then(res => res.json()).then(data => {
         if (data.error) {
             setEdit(null)

@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<responseMessage> handleGeneric(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new responseMessage(true, "Something went wrong"));
+                .body(new responseMessage(true, ex.getMessage()));
     }
 }
 

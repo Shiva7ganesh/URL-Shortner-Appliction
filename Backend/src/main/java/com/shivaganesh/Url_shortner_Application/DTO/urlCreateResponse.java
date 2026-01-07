@@ -9,5 +9,5 @@ public class urlCreateResponse {
     private boolean error;
     private String message;
     private String url;
-    private String token;
+//    private String token;
 }

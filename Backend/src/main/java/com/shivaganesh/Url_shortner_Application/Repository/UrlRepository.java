@@ -14,5 +14,5 @@ public interface UrlRepository extends MongoRepository<Url,String> {
 
     List<Url> findByShortUrlIn(List<String> shortUrls);
 
-    boolean deleteByShortUrl(String shortUrl);
+//    boolean deleteByShortUrl(String shortUrl);
 }

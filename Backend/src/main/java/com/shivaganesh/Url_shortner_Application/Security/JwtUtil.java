@@ -3,17 +3,26 @@ package com.shivaganesh.Url_shortner_Application.Security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+@Component
 public class JwtUtil {
 
-    private static final  String SECRET ="e2a9e96efd785fcf3bfdd979752577b6bb6f1f0269f6098acdc63304366911e5";
-//    private static final long EXPIRY = 1000 * 60 * 60 * 24 *7;
+    @Value("${jwt.secret}")
+    private String secret;
 
-    private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    private static Key key;
+
+    @PostConstruct
+    public void init() {
+        key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     public static String generateToken(String uid){
         return Jwts.builder()
