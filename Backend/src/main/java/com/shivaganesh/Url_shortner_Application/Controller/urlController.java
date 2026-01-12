@@ -29,7 +29,6 @@ public class urlController {
             @Valid @RequestBody CreateUrlRequest request,
             @RequestHeader(value = "Authorization", required = false) String header
             ){
-
         String token = urlservice.parseToken(header);
         Url url = urlservice.createShortUrl(request);
 
