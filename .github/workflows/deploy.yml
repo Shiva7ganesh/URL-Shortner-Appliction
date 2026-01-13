@@ -2,11 +2,12 @@ name: Docker CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: Production
 
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +48,7 @@ jobs:
               --name url-shortener \
               --restart always \
               -p 8080:8080 \
-              -e MONGO_URI=${{ secrets.MONGO_URI }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
